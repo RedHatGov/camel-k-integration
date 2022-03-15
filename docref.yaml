@@ -1,4 +1,4 @@
-# camel-k: language=yaml dependency=camel-base64 dependency=camel-file 
+# camel-k: language=yaml dependency=camel-base64 dependency=camel-file dependency=camel-file dependency=camel-quarkus-jackson trait=tracing.enabled=true trait=knative.enabled=true trait=knative-service.min-scale=1 trait=knative-service.max-scale=5 config=secret:cerner-access 
 
 - rest:      
     path: "/docref"
@@ -24,10 +24,10 @@
           - set-property:
               name: data
               simple: ${body}
-          - to: direct:auth
+#          - to: direct:auth
           - set-property:
               name: token
-              jsonpath: $.access_token
+              constant: '{"token":"abc"}' # $.access_token
           - choice:
               when:
                 - simple: ${exchangeProperty.token.length} > 0
@@ -118,8 +118,6 @@
           name: "Accept"
           expression:
             constant: "application/json"
-      - to:
-          uri: "netty-http:https://fhir-ehr-code.example.com:443/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/DocumentReference?hostnameVerification=true&traceEnabled=true&throwExceptionOnFailure=false"
       - to: 
           uri: "log:info?multiline=true&showAll=true"
       - set-body:
